@@ -34,7 +34,7 @@ lib/
 ├── gameover.dart      # Game over overlay
 └── images/            # dino.png, cactus.png
 android/  ios/         # Platform runners
-test/widget_test.dart  # Default Flutter widget test
+test/widget_test.dart  # Widget test: start screen and tap-to-start
 ```
 
 ## Getting Started
@@ -51,7 +51,8 @@ flutter run
 ## Notes
 
 - The high score is kept in memory only (resets when the app restarts).
-- `test/widget_test.dart` is the default Flutter counter test and does not match this app.
+- Run the widget test with `flutter test`.
+- Android application id / iOS bundle id: `com.alexissa.dinogame`.
 
 ## Author
 

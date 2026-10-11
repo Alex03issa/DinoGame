@@ -1,4 +1,4 @@
-package com.example.dinogame;
+package com.alexissa.dinogame;
 
 import io.flutter.embedding.android.FlutterActivity;
 
