@@ -1,30 +1,27 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dinogame/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('shows the start screen and starts the game on tap',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Start screen with an empty score and no game over overlay.
+    expect(find.text('TAP TO PLAY'), findsOneWidget);
+    expect(find.text('SCORE: 0'), findsOneWidget);
+    expect(find.text('HIGHSCORE: 0'), findsOneWidget);
+    expect(find.text('GAME OVER'), findsNothing);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Tapping anywhere starts the game and hides the start prompt.
+    await tester.tap(find.byType(Scaffold));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('TAP TO PLAY'), findsNothing);
+    expect(find.text('GAME OVER'), findsNothing);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Removing the game disposes it, which must cancel the game timer
+    // (otherwise the test fails with a pending timer).
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
