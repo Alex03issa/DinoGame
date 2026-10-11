@@ -40,28 +40,44 @@ class _HomePageState extends State<HomePage> {
   int highscore = 0;
   bool dinoPassedBarrier = false;
 
+  // How far the cactus moves on every game tick.
+  static const double barrierSpeed = 0.02;
+
+  // Timers are kept so they can be cancelled on restart and in dispose().
+  Timer? gameTimer;
+  Timer? jumpTimer;
+
+  @override
+  void dispose() {
+    gameTimer?.cancel();
+    jumpTimer?.cancel();
+    super.dispose();
+  }
+
 // This will make the map start moving, i.e., barriers will start to move
   void startGame() {
     setState(() {
       gameHasStarted = true;
     });
 
-    Timer.periodic(Duration(milliseconds: 10), (timer) {
+    gameTimer?.cancel();
+    gameTimer = Timer.periodic(Duration(milliseconds: 10), (timer) {
       if (detectCollision()) {
-        gameOver = true;
         timer.cancel();
         setState(() {
+          gameOver = true;
           if (score > highscore) {
             highscore = score;
           }
         });
+        // Stop here so the cactus and score don't move after game over.
+        return;
       }
 
-      loopBarriers();
-      updateScore();
-
+      // One state update per tick: move the cactus once, then update score.
       setState(() {
-        barrierX -= 0.01;
+        loopBarriers();
+        updateScore();
       });
     });
   }
@@ -69,24 +85,20 @@ class _HomePageState extends State<HomePage> {
 
 // Update score logic
   void updateScore() {
-    setState(() {
-      if (barrierX < dinoX && !dinoPassedBarrier) {
-        score++;
-        dinoPassedBarrier = true;
-      }
-    });
+    if (barrierX < dinoX && !dinoPassedBarrier) {
+      score++;
+      dinoPassedBarrier = true;
+    }
   }
 
 // Loop barriers for the endless runner effect
   void loopBarriers() {
-    setState(() {
-      if (barrierX <= -2.2) {
-        barrierX = 2.2;
-        dinoPassedBarrier = false;
-      } else {
-        barrierX -= 0.01;
-      }
-    });
+    if (barrierX <= -2.2) {
+      barrierX = 2.2;
+      dinoPassedBarrier = false;
+    } else {
+      barrierX -= barrierSpeed;
+    }
   }
 
 
@@ -104,7 +116,8 @@ class _HomePageState extends State<HomePage> {
 // Dino jump logic
   void jump() {
     midJump = true;
-    Timer.periodic(Duration(milliseconds: 10), (timer) {
+    jumpTimer?.cancel();
+    jumpTimer = Timer.periodic(Duration(milliseconds: 10), (timer) {
       height = -gravity / 2 * time * time + velocity * time;
 
       setState(() {
@@ -137,6 +150,8 @@ class _HomePageState extends State<HomePage> {
 
 // Play again logic for restarting the game
   void playAgain() {
+    gameTimer?.cancel();
+    jumpTimer?.cancel();
     setState(() {
       gameOver = false;
       gameHasStarted = false;
